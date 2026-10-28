@@ -1,4 +1,3 @@
-
 package com.mycompany.warungmakanan;
 
 import java.util.ArrayList;
@@ -8,244 +7,317 @@ import java.util.Scanner;
 
 public class WarungMakanan {
 
-    // ArrayList bertipe Superclass Produk
-    private static final ArrayList<Produk> daftarProduk =
-            new ArrayList<>();
+    // COMPOSITION
+    // Dapur dibuat langsung di dalam constructor WarungMakanan.
+    private final Dapur dapur;
 
-    // HashMap dengan ID sebagai Key dan Pelanggan sebagai Value
-    private static final HashMap<String, Pelanggan> dataPelanggan =
-            new HashMap<>();
+    // AGGREGATION
+    // WarungMakanan mengelola objek Produk dan Pelanggan.
+    private final ArrayList<Produk> daftarProduk;
+    private final HashMap<String, Pelanggan> dataPelanggan;
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        boolean jalan = true;
-
-        // Lima data awal untuk ArrayList
-        daftarProduk.add(new Makanan("M001", "Nasi Goreng", 15000, 2));
-        daftarProduk.add(new Makanan("M002", "Mie Ayam", 12000, 1));
-        daftarProduk.add(new Makanan("M003", "Bakso", 13000, 2));
-        daftarProduk.add(new Makanan("M004", "Ayam Geprek", 18000, 1));
-        daftarProduk.add(new Makanan("M005", "Soto Ayam", 14000, 3));
-
-        // Tiga data awal untuk HashMap
-        dataPelanggan.put("P001",
-                new Pelanggan("P001", "Andi"));
-        dataPelanggan.put("P002",
-                new Pelanggan("P002", "Budi"));
-        dataPelanggan.put("P003",
-                new Pelanggan("P003", "Siti"));
-
-        try {
-            while (jalan) {
-                try {
-                    System.out.println("\n================================");
-                    System.out.println(" SISTEM PEMESANAN WARUNG MAKANAN");
-                    System.out.println("================================");
-                    System.out.println("1. Tambah Pesanan Makanan");
-                    System.out.println("2. Tampilkan Semua Pesanan");
-                    System.out.println("3. Cari Pesanan");
-                    System.out.println("4. Tambah Pelanggan");
-                    System.out.println("5. Cari Pelanggan");
-                    System.out.println("6. Tampilkan Semua Pelanggan");
-                    System.out.println("0. Keluar");
-                    System.out.print("Pilih menu: ");
-
-                    int pilihan = scanner.nextInt();
-                    scanner.nextLine();
-
-                    switch (pilihan) {
-                        case 1:
-                            tambahMakanan(scanner);
-                            break;
-
-                        case 2:
-                            tampilkanSemuaProduk();
-                            break;
-
-                        case 3:
-                            System.out.print("Masukkan kode makanan: ");
-                            String kode = scanner.nextLine();
-                            cariProduk(kode);
-                            break;
-
-                        case 4:
-                            tambahPelanggan(scanner);
-                            break;
-
-                        case 5:
-                            System.out.print("Masukkan ID pelanggan: ");
-                            String id = scanner.nextLine();
-                            cariPelanggan(id);
-                            break;
-
-                        case 6:
-                            tampilkanSemuaPelanggan();
-                            break;
-
-                        case 0:
-                            jalan = false;
-                            System.out.println("Program selesai.");
-                            break;
-
-                        default:
-                            System.out.println("Pilihan menu tidak valid.");
-                    }
-
-                } catch (InputMismatchException e) {
-                    System.out.println(
-                            "Error: Input harus sesuai tipe data!");
-                    scanner.nextLine();
-
-                } catch (DataTidakValidException
-                        | DataTidakDitemukanException e) {
-                    System.out.println("Error: " + e.getMessage());
-
-                } finally {
-                    System.out.println(
-                            "Finally: Proses menu telah selesai.");
-                }
-            }
-        } finally {
-            scanner.close();
-            System.out.println("Scanner ditutup. Program berakhir.");
-        }
+    // Constructor
+    public WarungMakanan() {
+        dapur = new Dapur();
+        daftarProduk = new ArrayList<>();
+        dataPelanggan = new HashMap<>();
     }
 
-    // Menambahkan makanan dengan validasi
-    public static void tambahMakanan(Scanner scanner)
+    // Menambahkan produk
+    public void tambahProduk(Produk produk)
             throws DataTidakValidException {
 
-        System.out.print("Masukkan kode makanan: ");
-        String kode = scanner.nextLine().trim();
-
-        System.out.print("Masukkan nama makanan: ");
-        String nama = scanner.nextLine().trim();
-
-        System.out.print("Masukkan harga makanan: ");
-        double harga = scanner.nextDouble();
-
-        System.out.print("Masukkan jumlah pesanan: ");
-        int jumlah = scanner.nextInt();
-        scanner.nextLine();
-
-        if (kode.isEmpty() || nama.isEmpty()) {
+        if (produk == null) {
             throw new DataTidakValidException(
-                    "Kode dan nama makanan tidak boleh kosong!");
+                    "Produk tidak boleh kosong!"
+            );
         }
 
-        if (harga <= 0 || jumlah <= 0) {
-            throw new DataTidakValidException(
-                    "Harga dan jumlah harus lebih dari nol!");
-        }
-
-        for (Produk produk : daftarProduk) {
-            if (produk.getKode().equalsIgnoreCase(kode)) {
+        for (Produk p : daftarProduk) {
+            if (p.getKode().equalsIgnoreCase(produk.getKode())) {
                 throw new DataTidakValidException(
-                        "Kode makanan sudah digunakan!");
+                        "Kode produk sudah digunakan!"
+                );
             }
         }
 
-        Makanan makanan = new Makanan(
-                kode, nama, harga, jumlah);
-
-        daftarProduk.add(makanan);
-
-        System.out.println("Pesanan berhasil ditambahkan.");
-        System.out.println("Total harga: Rp" + makanan.hitungTotal());
+        daftarProduk.add(produk);
+        System.out.println("Produk berhasil ditambahkan.");
     }
 
-    // Menampilkan seluruh isi ArrayList
-    public static void tampilkanSemuaProduk() {
-        if (daftarProduk.isEmpty()) {
-            System.out.println("Belum ada pesanan.");
-            return;
+    // Menambahkan pelanggan
+    public void tambahPelanggan(Pelanggan pelanggan)
+            throws DataTidakValidException {
+
+        if (pelanggan == null) {
+            throw new DataTidakValidException(
+                    "Pelanggan tidak boleh kosong!"
+            );
         }
 
-        System.out.println("\n=== DAFTAR PESANAN MAKANAN ===");
-
-        for (int i = 0; i < daftarProduk.size(); i++) {
-            System.out.println("Pesanan ke-" + (i + 1));
-            daftarProduk.get(i).tampilkanInfo();
+        if (dataPelanggan.containsKey(pelanggan.getId())) {
+            throw new DataTidakValidException(
+                    "ID pelanggan sudah terdaftar!"
+            );
         }
 
-        System.out.println(
-                "Jumlah jenis makanan: " + daftarProduk.size());
+        dataPelanggan.put(pelanggan.getId(), pelanggan);
+        System.out.println("Pelanggan berhasil ditambahkan.");
     }
 
-    // Mencari makanan dengan throw dan throws
-    public static void cariProduk(String kode)
+    // Mencari produk
+    public Produk cariProduk(String kode)
             throws DataTidakDitemukanException {
 
         for (Produk produk : daftarProduk) {
             if (produk.getKode().equalsIgnoreCase(kode.trim())) {
-                System.out.println("Data makanan ditemukan:");
-                produk.tampilkanInfo();
-                return;
+                return produk;
             }
         }
 
         throw new DataTidakDitemukanException(
-                "Makanan dengan kode " + kode + " tidak ditemukan!");
+                "Produk dengan kode " + kode + " tidak ditemukan!"
+        );
     }
 
-    // Menambahkan pelanggan ke HashMap
-    public static void tambahPelanggan(Scanner scanner)
-            throws DataTidakValidException {
-
-        System.out.print("Masukkan ID pelanggan: ");
-        String id = scanner.nextLine().trim();
-
-        System.out.print("Masukkan nama pelanggan: ");
-        String nama = scanner.nextLine().trim();
-
-        if (id.isEmpty() || nama.isEmpty()) {
-            throw new DataTidakValidException(
-                    "ID dan nama pelanggan tidak boleh kosong!");
-        }
-
-        if (dataPelanggan.containsKey(id)) {
-            throw new DataTidakValidException(
-                    "ID pelanggan sudah terdaftar!");
-        }
-
-        Pelanggan pelanggan = new Pelanggan(id, nama);
-        dataPelanggan.put(id, pelanggan);
-
-        System.out.println("Pelanggan berhasil ditambahkan.");
-    }
-
-    // Mencari pelanggan menggunakan Key HashMap
-    public static void cariPelanggan(String id)
+    // Mencari pelanggan
+    public Pelanggan cariPelanggan(String id)
             throws DataTidakDitemukanException {
 
-        if (dataPelanggan.containsKey(id.trim())) {
-            Pelanggan pelanggan = dataPelanggan.get(id.trim());
+        Pelanggan pelanggan = dataPelanggan.get(id.trim());
 
-            System.out.println("Pelanggan ditemukan:");
-            pelanggan.tampilkanInfo();
-        } else {
+        if (pelanggan == null) {
             throw new DataTidakDitemukanException(
-                    "Pelanggan dengan ID " + id
-                    + " tidak ditemukan!");
+                    "Pelanggan dengan ID " + id + " tidak ditemukan!"
+            );
         }
+
+        return pelanggan;
     }
 
-    // Menampilkan semua Value dari HashMap
-    public static void tampilkanSemuaPelanggan() {
-        if (dataPelanggan.isEmpty()) {
-            System.out.println("Belum ada data pelanggan.");
+    // Menampilkan semua produk
+    public void tampilkanSemuaProduk() {
+        System.out.println("\n=== DAFTAR PRODUK ===");
+
+        if (daftarProduk.isEmpty()) {
+            System.out.println("Belum ada produk.");
             return;
         }
 
+        for (Produk produk : daftarProduk) {
+            produk.tampilkanInfo();
+            System.out.println("--------------------");
+        }
+
+        System.out.println("Jumlah produk: " + daftarProduk.size());
+    }
+
+    // Menampilkan semua pelanggan
+    public void tampilkanSemuaPelanggan() {
         System.out.println("\n=== DAFTAR PELANGGAN ===");
 
-        for (String id : dataPelanggan.keySet()) {
-            Pelanggan pelanggan = dataPelanggan.get(id);
+        if (dataPelanggan.isEmpty()) {
+            System.out.println("Belum ada pelanggan.");
+            return;
+        }
+
+        for (Pelanggan pelanggan : dataPelanggan.values()) {
             pelanggan.tampilkanInfo();
-            System.out.println("----------------------------");
+            System.out.println("--------------------");
         }
 
         System.out.println(
-                "Jumlah pelanggan: " + dataPelanggan.size());
+                "Jumlah pelanggan: " + dataPelanggan.size()
+        );
+    }
+
+    // Menampilkan komponen Composition
+    public void tampilkanDapur() {
+        System.out.println("\n=== INFORMASI DAPUR ===");
+        dapur.tampilkanInfo();
+    }
+
+    // ASSOCIATION
+    // Transaksi menggunakan objek Pelanggan dan Produk.
+    public void lakukanTransaksi(String id, String kode) {
+        try {
+            Pelanggan pelanggan = cariPelanggan(id);
+            Produk produk = cariProduk(kode);
+
+            Transaksi transaksi = new Transaksi();
+            transaksi.prosesTransaksi(pelanggan, produk);
+
+        } catch (DataTidakDitemukanException
+                | DataTidakValidException e) {
+            System.out.println("Transaksi gagal: " + e.getMessage());
+        }
+    }
+
+    // Program utama
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        WarungMakanan warung = new WarungMakanan();
+
+        // Objek Produk dibuat di luar objek WarungMakanan.
+        // Lima objek utama.
+        try {
+            warung.tambahProduk(
+                    new Makanan("M001", "Nasi Goreng", 15000, 2));
+            warung.tambahProduk(
+                    new Makanan("M002", "Mie Ayam", 12000, 1));
+            warung.tambahProduk(
+                    new Makanan("M003", "Bakso", 13000, 2));
+            warung.tambahProduk(
+                    new Makanan("M004", "Ayam Geprek", 18000, 1));
+            warung.tambahProduk(
+                    new Makanan("M005", "Soto Ayam", 14000, 3));
+
+            // Tiga objek pendukung Pelanggan.
+            warung.tambahPelanggan(
+                    new Pelanggan("P001", "Andi"));
+            warung.tambahPelanggan(
+                    new Pelanggan("P002", "Budi"));
+            warung.tambahPelanggan(
+                    new Pelanggan("P003", "Siti"));
+
+        } catch (DataTidakValidException e) {
+            System.out.println(e.getMessage());
+        }
+
+        boolean jalan = true;
+
+        while (jalan) {
+            try {
+                System.out.println("\n================================");
+                System.out.println(" SISTEM PEMESANAN WARUNG MAKANAN");
+                System.out.println("================================");
+                System.out.println("1. Informasi Dapur");
+                System.out.println("2. Tampilkan Semua Produk");
+                System.out.println("3. Cari Produk");
+                System.out.println("4. Tambah Produk");
+                System.out.println("5. Tampilkan Semua Pelanggan");
+                System.out.println("6. Tambah Pelanggan");
+                System.out.println("7. Cari Pelanggan");
+                System.out.println("8. Lakukan Transaksi");
+                System.out.println("0. Keluar");
+                System.out.print("Pilih menu: ");
+
+                int pilihan = scanner.nextInt();
+                scanner.nextLine();
+
+                switch (pilihan) {
+                    case 1:
+                        warung.tampilkanDapur();
+                        break;
+
+                    case 2:
+                        warung.tampilkanSemuaProduk();
+                        break;
+
+                    case 3:
+                        System.out.print("Kode produk: ");
+                        String kodeCari = scanner.nextLine();
+
+                        try {
+                            warung.cariProduk(kodeCari).tampilkanInfo();
+                        } catch (DataTidakDitemukanException e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+
+                    case 4:
+                        System.out.print("Kode produk: ");
+                        String kode = scanner.nextLine();
+
+                        System.out.print("Nama produk: ");
+                        String nama = scanner.nextLine();
+
+                        System.out.print("Harga produk: ");
+                        double harga = scanner.nextDouble();
+
+                        System.out.print("Jumlah pesanan: ");
+                        int jumlah = scanner.nextInt();
+                        scanner.nextLine();
+
+                        if (kode.trim().isEmpty()
+                                || nama.trim().isEmpty()
+                                || harga <= 0 || jumlah <= 0) {
+                            System.out.println("Data produk tidak valid.");
+                            break;
+                        }
+
+                        warung.tambahProduk(
+                                new Makanan(kode, nama, harga, jumlah)
+                        );
+                        break;
+
+                    case 5:
+                        warung.tampilkanSemuaPelanggan();
+                        break;
+
+                    case 6:
+                        System.out.print("ID pelanggan: ");
+                        String idBaru = scanner.nextLine();
+
+                        System.out.print("Nama pelanggan: ");
+                        String namaBaru = scanner.nextLine();
+
+                        if (idBaru.trim().isEmpty()
+                                || namaBaru.trim().isEmpty()) {
+                            System.out.println(
+                                    "ID dan nama tidak boleh kosong."
+                            );
+                            break;
+                        }
+
+                        warung.tambahPelanggan(
+                                new Pelanggan(idBaru, namaBaru)
+                        );
+                        break;
+
+                    case 7:
+                        System.out.print("ID pelanggan: ");
+                        String idCari = scanner.nextLine();
+
+                        try {
+                            warung.cariPelanggan(idCari).tampilkanInfo();
+                        } catch (DataTidakDitemukanException e) {
+                            System.out.println(e.getMessage());
+                        }
+                        break;
+
+                    case 8:
+                        warung.tampilkanSemuaPelanggan();
+                        System.out.print("ID pelanggan: ");
+                        String idTransaksi = scanner.nextLine();
+
+                        warung.tampilkanSemuaProduk();
+                        System.out.print("Kode produk: ");
+                        String kodeTransaksi = scanner.nextLine();
+
+                        warung.lakukanTransaksi(
+                                idTransaksi, kodeTransaksi
+                        );
+                        break;
+
+                    case 0:
+                        jalan = false;
+                        System.out.println("Program selesai.");
+                        break;
+
+                    default:
+                        System.out.println("Pilihan menu tidak valid.");
+                }
+
+            } catch (InputMismatchException e) {
+                System.out.println("Input harus sesuai tipe data.");
+                scanner.nextLine();
+
+            } catch (DataTidakValidException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+
+        scanner.close();
     }
 }
